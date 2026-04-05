@@ -3,324 +3,410 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TechTerm V5.0</title>
-
+  <title>TechTerm V5.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <meta name="theme-color" content="#050505">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <style>
-    * { box-sizing: border-box; }
-    body { background-color: #050505; color: #ecfeff; font-family: 'Courier New', monospace; margin: 0; }
-
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-    @keyframes scanline { 0% { top: -2px; } 100% { top: 100vh; } }
-    @keyframes fadein { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-    .scanline {
-      position: fixed; left: 0; right: 0; height: 2px; top: 0;
-      background: linear-gradient(transparent, rgba(34,211,238,0.18), transparent);
-      animation: scanline 5s linear infinite;
-      pointer-events: none; z-index: 9999;
-    }
-    .progress-glow { box-shadow: 0 0 14px rgba(34,211,238,0.55); }
-    .spin { animation: spin 1s linear infinite; }
-    .fadein { animation: fadein 0.4s ease both; }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: #164e63; }
+    *{box-sizing:border-box;}
+    body{background:#050505;color:#ecfeff;font-family:'Courier New',monospace;margin:0;}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes scanline{0%{top:-2px}100%{top:100vh}}
+    @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .scanline{position:fixed;left:0;right:0;height:2px;top:0;background:linear-gradient(transparent,rgba(34,211,238,0.15),transparent);animation:scanline 6s linear infinite;pointer-events:none;z-index:9999;}
+    .spin{animation:spin 1s linear infinite;}
+    .fadein{animation:fadein 0.35s ease both;}
+    .glow{box-shadow:0 0 12px rgba(34,211,238,0.5);}
+    ::-webkit-scrollbar{width:3px;}
+    ::-webkit-scrollbar-thumb{background:#164e63;}
   </style>
 </head>
 <body>
-  <div class="scanline"></div>
-  <div id="root"></div>
+<div class="scanline"></div>
+<div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
-    /* \u2500\u2500 Icons \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-    const IcoTerminal = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>;
-    const IcoLink     = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>;
-    const IcoRefresh  = ({spin}) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={spin ? 'spin' : ''}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>;
-    const IcoKey      = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>;
+/* ─── Icons ─────────────────────────────────────────────── */
+const IcoTerm    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>;
+const IcoLink    = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>;
+const IcoRefresh = ({spin}) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={spin?'spin':''}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>;
+const IcoKey     = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>;
 
-    /* \u2500\u2500 Cache (20 min TTL) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-    const CACHE_KEY = 'tt_v5_cache';
-    const CACHE_TTL = 20 * 60 * 1000;
+/* ─── Cache (25 min) ────────────────────────────────────── */
+const CK = 'tt_v51';
+const TTL = 25 * 60 * 1000;
+const saveCache = (d) => { try { localStorage.setItem(CK, JSON.stringify({ts:Date.now(),d})); } catch(_){} };
+const loadCache = () => {
+  try {
+    const r = localStorage.getItem(CK);
+    if (!r) return null;
+    const {ts,d} = JSON.parse(r);
+    if (Date.now()-ts < TTL) return {d,ts};
+    localStorage.removeItem(CK);
+  } catch(_) {}
+  return null;
+};
 
-    function saveCache(payload) {
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), payload })); } catch(_) {}
-    }
-    function loadCache() {
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (!raw) return null;
-        const { ts, payload } = JSON.parse(raw);
-        if (Date.now() - ts < CACHE_TTL) return { payload, ts };
-        localStorage.removeItem(CACHE_KEY);
-      } catch(_) {}
-      return null;
-    }
-
-    /* \u2500\u2500 Open link \u2014 best-effort for WebIntoApp WebView \u2500\u2500\u2500\u2500\u2500\u2500\u2500
-       WebIntoApp can be configured to open external URLs in the
-       system browser. We try multiple methods so at least one works. */
-    function openLink(url) {
-      if (!url || !url.startsWith('http')) return;
-      // Method 1: anchor click (most reliable in WebView)
-      try {
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      } catch(_) {}
-      // Method 2: window.open
-      try { window.open(url, '_blank', 'noopener,noreferrer'); return; } catch(_) {}
-      // Method 3: location (last resort)
-      try { window.location.href = url; } catch(_) {}
-    }
-
-    /* \u2500\u2500 Gemini fetch \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-    async function fetchFromGemini(apiKey) {
-      const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
-
-      // We split the request into TWO smaller batches (10 each) and merge,
-      // because Gemini free-tier times out on very long responses.
-      const makePrompt = (batch) => `
-\u73fe\u5728\u53f0\u7063\u6642\u9593\uff1a${now}\u3002
-
-\u4f60\u662f\u79d1\u6280\u65b0\u805e\u7de8\u8f2f\u3002\u8acb\u4f7f\u7528 Google Search \u641c\u5c0b\u904e\u53bb 24 \u5c0f\u6642\u5167\u667a\u6167\u578b\u624b\u6a5f\u3001\u5e73\u677f\u3001\u7a7f\u6234\u88dd\u7f6e\u76f8\u95dc\u6700\u65b0\u6d88\u606f\uff08\u898f\u683c\u6d29\u6f0f\u3001\u767c\u5e03\u3001\u8a55\u6e2c\u3001\u97cc\u9ad4\u3001\u5c08\u5229\u7b49\uff09\u3002
-
-\u3010\u8a9e\u8a00\u898f\u5b9a\u3011\uff1a\u6240\u6709\u4e2d\u6587\u5167\u5bb9\u5fc5\u9808\u4f7f\u7528\u3010\u7e41\u9ad4\u4e2d\u6587\u3011\uff0c\u56b4\u7981\u7c21\u9ad4\u5b57\u3002\u54c1\u724c\u3001\u578b\u865f\u4fdd\u7559\u82f1\u6587\u3002
-
-\u8acb\u56de\u50b3\u7b2c ${batch} \u6279\uff0c\u5171 10 \u7b46\u65b0\u805e\uff0c\u7d14 JSON \u683c\u5f0f\uff0c\u4e0d\u542b\u4efb\u4f55 markdown\uff1a
-{
-  "newsItems": [
-    {
-      "brand": "\u54c1\u724c\u82f1\u6587\uff08Apple/Samsung/Google/Xiaomi/ASUS\u7b49\uff09",
-      "titleZh": "\u7e41\u9ad4\u4e2d\u6587\u6a19\u984c",
-      "titleEn": "English subtitle",
-      "summary": "\u7e41\u9ad4\u4e2d\u6587\u6458\u8981 2-3 \u53e5\\n\u82f1\u6587 1-2 sentences",
-      "source": "\u4f86\u6e90\u7db2\u7ad9",
-      "time": "X \u5c0f\u6642\u524d",
-      "url": "https://\u5b8c\u6574\u7db2\u5740",
-      "score": \u71b1\u5ea60\u5230100\u6574\u6578
-    }
-  ]
+/* ─── Open URL (WebIntoApp safe) ────────────────────────── */
+function openLink(url) {
+  if (!url || !url.startsWith('http')) return;
+  try {
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    return;
+  } catch(_) {}
+  try { window.open(url, '_blank'); } catch(_) {}
 }
-\u6ce8\u610f\uff1aurl \u5fc5\u9808\u662f\u771f\u5be6\u5b8c\u6574\u7684 https \u7db2\u5740\uff0c\u4e0d\u53ef\u7701\u7565\u3002`;
 
-      const callGemini = async (prompt) => {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            tools: [{ google_search: {} }],
-            generationConfig: { temperature: 0.3, maxOutputTokens: 4096 }
-          })
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err?.error?.message || `HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        text = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-        // Extract JSON object
-        const match = text.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error('\u7121\u6cd5\u89e3\u6790 JSON');
-        return JSON.parse(match[0]);
-      };
+/* ─── Single Gemini call ────────────────────────────────── */
+async function gemini(apiKey, prompt, useSearch) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.25, maxOutputTokens: 6000 }
+  };
+  if (useSearch) body.tools = [{ google_search: {} }];
 
-      // \u7b2c\u4e00\u6279
-      const batch1 = await callGemini(makePrompt('\u7b2c\u4e00'));
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
 
-      // \u6458\u8981\u677f \u2014 single short request
-      const summaryPrompt = `\u6839\u64da\u4ee5\u4e0b\u65b0\u805e\uff0c\u7528\u7e41\u9ad4\u4e2d\u6587\u5beb 120 \u5b57\u4ee5\u5167\u7684\u4eca\u65e5\u79d1\u6280\u65b0\u805e\u91cd\u9ede\u6458\u8981\uff0c\u4e0d\u52a0\u6a19\u984c\uff0c\u76f4\u63a5\u8f38\u51fa\u7d14\u6587\u5b57\uff1a
-${batch1.newsItems.slice(0, 5).map(n => n.titleZh).join('\u3001')}`;
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    const msg = e?.error?.message || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
 
-      let summaryBoard = '';
-      try {
-        const sRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: summaryPrompt }] }],
-            generationConfig: { temperature: 0.4, maxOutputTokens: 512 }
-          })
-        });
-        const sd = await sRes.json();
-        summaryBoard = sd?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-      } catch(_) {}
+  const data = await res.json();
+  // Extract text from all parts (Gemini sometimes splits into multiple parts)
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  let text = parts.map(p => p.text || '').join('');
+  // Strip markdown fences if present
+  text = text.replace(/```json[\s\S]*?```/g, m => m.slice(7, -3))
+             .replace(/```[\s\S]*?```/g, m => m.slice(3, -3))
+             .trim();
+  return text;
+}
 
-      // \u7b2c\u4e8c\u6279\uff08\u975e\u540c\u6b65\uff0c\u5931\u6557\u4e0d\u4e2d\u65b7\uff09
-      let batch2Items = [];
-      try {
-        const batch2 = await callGemini(makePrompt('\u7b2c\u4e8c'));
-        batch2Items = batch2.newsItems || [];
-      } catch(_) {}
+/* ─── Parse JSON safely ─────────────────────────────────── */
+function parseNews(text) {
+  // Try to find JSON object
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return [];
+  try {
+    const obj = JSON.parse(match[0]);
+    return Array.isArray(obj.newsItems) ? obj.newsItems : [];
+  } catch(_) {
+    // Try to fix truncated JSON by closing brackets
+    try {
+      const fixed = match[0].replace(/,\s*$/, '') + ']}';
+      const obj = JSON.parse(fixed);
+      return Array.isArray(obj.newsItems) ? obj.newsItems : [];
+    } catch(_) { return []; }
+  }
+}
 
-      const allItems = [...(batch1.newsItems || []), ...batch2Items]
-        .sort((a, b) => (b.score || 0) - (a.score || 0));
+/* ─── Main news fetcher (sequential, crash-safe) ────────── */
+async function fetchNews(apiKey, onStatus) {
+  const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
 
-      return { summaryBoard, newsItems: allItems };
+  onStatus('第一批搜尋中... (1/3)');
+
+  // Batch 1 — with Google Search
+  const p1 = `現在台灣時間：${now}。
+你是科技新聞編輯。用 Google Search 搜尋過去 24 小時內手機、平板、穿戴裝置相關最新消息。
+
+規定：
+- 所有中文【必須是繁體中文】，禁止簡體字
+- 品牌型號保留英文（如 Samsung Galaxy S25）
+
+回傳 10 筆，純 JSON，禁止加 markdown 符號：
+{"newsItems":[{"brand":"英文品牌","titleZh":"繁體中文標題","titleEn":"English subtitle","summary":"繁體摘要2句\\n英文1句","source":"來源網站","time":"X小時前","url":"https://完整網址","score":85}]}
+
+url 必須是完整 https 網址。score 是熱度 0-100。`;
+
+  const t1 = await gemini(apiKey, p1, true);
+  const items1 = parseNews(t1);
+
+  onStatus(`已取得 ${items1.length} 則，繼續搜尋第二批... (2/3)`);
+
+  // Wait 2s to respect free-tier rate limit (15 RPM)
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Batch 2
+  const usedTitles = items1.map(n => n.titleZh).join('、');
+  const p2 = `現在台灣時間：${now}。
+你是科技新聞編輯。用 Google Search 搜尋過去 24 小時內手機、平板、穿戴裝置相關最新消息。
+已有以下新聞，請找不重複的：${usedTitles || '無'}
+
+規定：
+- 所有中文【必須是繁體中文】，禁止簡體字
+- 品牌型號保留英文
+
+回傳 10 筆不重複新聞，純 JSON，禁止加 markdown：
+{"newsItems":[{"brand":"英文品牌","titleZh":"繁體中文標題","titleEn":"English subtitle","summary":"繁體摘要2句\\n英文1句","source":"來源網站","time":"X小時前","url":"https://完整網址","score":75}]}`;
+
+  let items2 = [];
+  try {
+    const t2 = await gemini(apiKey, p2, true);
+    items2 = parseNews(t2);
+  } catch(e) {
+    console.warn('Batch 2 failed:', e.message);
+    // Continue with just batch 1
+  }
+
+  onStatus('整理摘要中... (3/3)');
+  await new Promise(r => setTimeout(r, 1000));
+
+  // Merge & deduplicate
+  const seen = new Set();
+  const all = [...items1, ...items2].filter(item => {
+    const key = (item.titleZh || item.titleEn || '').trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  // Summary (no search = fast, no rate limit issue)
+  let summaryBoard = '';
+  if (all.length > 0) {
+    const heads = all.slice(0, 8).map(n => n.titleZh).join('；');
+    const sp = `根據以下新聞標題，用【繁體中文】寫 100 字以內的科技新聞今日重點摘要，直接輸出純文字，不加任何標題符號：\n${heads}`;
+    try {
+      summaryBoard = (await gemini(apiKey, sp, false)).trim();
+    } catch(_) {}
+  }
+
+  return { summaryBoard, newsItems: all };
+}
+
+/* ─── Score bar ─────────────────────────────────────────── */
+function ScoreBar({ score }) {
+  const s = Math.max(0, Math.min(100, score || 0));
+  const c = s >= 80 ? '#22d3ee' : s >= 55 ? '#67e8f9' : '#164e63';
+  return (
+    <div className="flex items-center gap-2 my-2">
+      <div className="flex-1 h-px bg-gray-800">
+        <div style={{ width:`${s}%`, background:c, height:'1px' }} />
+      </div>
+      <span style={{ color:c, fontSize:9, fontWeight:700 }}>HOT {s}</span>
+    </div>
+  );
+}
+
+/* ─── App ───────────────────────────────────────────────── */
+function App() {
+  const [news, setNews]         = useState({ summaryBoard:'', newsItems:[] });
+  const [loading, setLoading]   = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus]     = useState('');
+  const [error, setError]       = useState('');
+  const [lastUp, setLastUp]     = useState(null);
+  const [showKey, setShowKey]   = useState(false);
+  const [keyInput, setKeyInput] = useState('');
+  const [apiKey, setApiKey]     = useState('');
+  const fetched = useRef(false);
+
+  // Load key
+  useEffect(() => {
+    const k = localStorage.getItem('gemini_key') || '';
+    setApiKey(k); setKeyInput(k);
+  }, []);
+
+  // Progress ticker
+  useEffect(() => {
+    let iv;
+    if (loading) {
+      setProgress(5);
+      iv = setInterval(() => setProgress(p => p < 80 ? p + (80-p)*0.03 : p), 500);
     }
+    return () => clearInterval(iv);
+  }, [loading]);
 
-    /* \u2500\u2500 Score bar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-    function ScoreBar({ score }) {
-      const s = Math.max(0, Math.min(100, score || 0));
-      const color = s >= 80 ? '#22d3ee' : s >= 60 ? '#67e8f9' : '#164e63';
-      return (
-        <div className="flex items-center gap-2 mt-1">
-          <div className="flex-1 h-1 bg-gray-900 rounded-full overflow-hidden">
-            <div style={{ width: `${s}%`, background: color, height: '100%' }} />
-          </div>
-          <span style={{ color, fontSize: 10, fontWeight: 700, minWidth: 28 }}>{s}</span>
+  // Auto-fetch on mount
+  useEffect(() => {
+    if (fetched.current) return;
+    const k = localStorage.getItem('gemini_key') || '';
+    if (!k) { setShowKey(true); return; }
+    fetched.current = true;
+    const cached = loadCache();
+    if (cached) { setNews(cached.d); setLastUp(new Date(cached.ts)); return; }
+    runFetch(k);
+  // eslint-disable-next-line
+  }, []);
+
+  const runFetch = async (key) => {
+    const k = (key || apiKey || '').trim();
+    if (!k) { setShowKey(true); return; }
+    setLoading(true); setError(''); setStatus('');
+    try {
+      const result = await fetchNews(k, setStatus);
+      setNews(result);
+      saveCache(result);
+      setLastUp(new Date());
+      setProgress(100);
+    } catch(e) {
+      const msg = e.message || '';
+      if (msg.includes('API_KEY') || msg.includes('400') || msg.includes('key')) {
+        setError('API 金鑰無效，請重新確認後儲存。');
+        setShowKey(true);
+      } else if (msg.includes('429') || msg.includes('quota')) {
+        setError('已達免費版使用上限，請稍後幾分鐘再試。');
+      } else {
+        setError('搜尋失敗：' + msg.slice(0, 80));
+      }
+    } finally {
+      setStatus('');
+      setTimeout(() => setLoading(false), 300);
+    }
+  };
+
+  const saveKey = () => {
+    const k = keyInput.trim();
+    if (!k) return;
+    localStorage.setItem('gemini_key', k);
+    setApiKey(k);
+    setShowKey(false);
+    setError('');
+    if (!news.newsItems.length) runFetch(k);
+  };
+
+  const fmt = d => d ? d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}) : '';
+
+  return (
+    <div className="p-4 max-w-xl mx-auto pb-24">
+
+      {/* Top bar */}
+      <div className="flex justify-between items-center mb-5 text-[10px] font-bold border-b border-cyan-900/25 pb-2">
+        <span className="flex items-center gap-2 text-cyan-500"><IcoTerm/> TECH_TERM_V5.1</span>
+        <button onClick={() => setShowKey(!showKey)}
+          className="flex items-center gap-1.5 hover:text-cyan-300 transition-colors">
+          <IcoKey/>
+          <span className={apiKey ? 'text-cyan-700' : 'text-red-500'}>
+            {apiKey ? 'KEY_OK' : 'KEY_MISSING'}
+          </span>
+        </button>
+      </div>
+
+      {/* Key panel */}
+      {showKey && (
+        <div className="mb-6 p-4 border border-cyan-800 bg-[#080c10] fadein">
+          <p className="text-[10px] text-cyan-700 mb-1 uppercase tracking-widest">Gemini API Key</p>
+          <p className="text-[9px] text-gray-600 mb-3">免費版：<span className="text-cyan-900">aistudio.google.com/apikey</span></p>
+          <input
+            type="password"
+            value={keyInput}
+            onChange={e => setKeyInput(e.target.value)}
+            onKeyDown={e => e.key==='Enter' && saveKey()}
+            placeholder="AIzaSy..."
+            className="bg-black border border-cyan-900 text-cyan-300 px-3 py-3 text-sm w-full mb-3 focus:outline-none focus:border-cyan-600"
+          />
+          <button onClick={saveKey}
+            className="w-full bg-cyan-900/40 text-cyan-300 py-2.5 text-xs border border-cyan-800 uppercase font-bold hover:bg-cyan-800/50 transition-colors">
+            儲存並開始掃描
+          </button>
         </div>
-      );
-    }
+      )}
 
-    /* \u2500\u2500 App \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-    function App() {
-      const [data, setData]         = useState({ summaryBoard: '', newsItems: [] });
-      const [loading, setLoading]   = useState(false);
-      const [progress, setProgress] = useState(0);
-      const [error, setError]       = useState(null);
-      const [lastUpdate, setLastUpdate] = useState(null);
-      const [showKey, setShowKey]   = useState(false);
-      const [keyInput, setKeyInput] = useState('');
-      const [apiKey, setApiKey]     = useState('');
-      const hasFetched = useRef(false);
-
-      // Load saved key on mount
-      useEffect(() => {
-        const saved = localStorage.getItem('gemini_api_key') || '';
-        setApiKey(saved);
-        setKeyInput(saved);
-      }, []);
-
-      // Progress animation
-      useEffect(() => {
-        let iv;
-        if (loading) {
-          setProgress(8);
-          iv = setInterval(() => setProgress(p => p < 88 ? p + (88 - p) * 0.05 : p), 350);
-        }
-        return () => clearInterval(iv);
-      }, [loading]);
-
-      // Auto-fetch on mount (use cache if fresh, else fetch)
-      useEffect(() => {
-        if (hasFetched.current) return;
-        const saved = localStorage.getItem('gemini_api_key') || '';
-        if (!saved) { setShowKey(true); return; }
-        hasFetched.current = true;
-
-        const cached = loadCache();
-        if (cached) {
-          setData(cached.payload);
-          setLastUpdate(new Date(cached.ts));
-          return;
-        }
-        runFetch(saved);
-      }, []);
-
-      const runFetch = async (key) => {
-        const k = key || apiKey;
-        if (!k) { setShowKey(true); return; }
-        setLoading(true); setError(null);
-        try {
-          const result = await fetchFromGemini(k);
-          setData(result);
-          saveCache(result);
-          setLastUpdate(new Date());
-          setProgress(100);
-        } catch (err) {
-          setError('\u6383\u63cf\u5931\u6557\uff1a' + (err.message || '\u8acb\u78ba\u8a8d\u91d1\u9470\u8207\u7db2\u8def'));
-        } finally {
-          setTimeout(() => setLoading(false), 400);
-        }
-      };
-
-      const saveKey = () => {
-        localStorage.setItem('gemini_api_key', keyInput);
-        setApiKey(keyInput);
-        setShowKey(false);
-        if (!data.newsItems.length) runFetch(keyInput);
-      };
-
-      const formatTime = (d) => d ? d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '';
-
-      return (
-        <div className="p-4 max-w-xl mx-auto pb-24">
-
-          {/* \u2500\u2500 Header bar \u2500\u2500 */}
-          <div className="flex justify-between items-center mb-5 text-[10px] text-cyan-700 font-bold border-b border-cyan-900/30 pb-2">
-            <span className="flex items-center gap-2 text-cyan-500"><IcoTerminal /> TECH_TERM_V5.0</span>
-            <button onClick={() => setShowKey(!showKey)} className="flex items-center gap-1 hover:text-cyan-400 transition-colors">
-              <IcoKey />
-              <span className={apiKey ? 'text-cyan-500' : 'text-red-500'}>
-                {apiKey ? 'KEY_ACTIVE' : 'KEY_MISSING'}
-              </span>
-            </button>
-          </div>
-
-          {/* \u2500\u2500 Key panel \u2500\u2500 */}
-          {showKey && (
-            <div className="mb-6 p-4 border border-cyan-800 bg-[#080c10] fadein">
-              <p className="text-[10px] text-cyan-700 mb-2 uppercase">Gemini API Key\uff08\u514d\u8cbb\u7248\u9069\u7528\uff09</p>
-              <input
-                type="password"
-                value={keyInput}
-                onChange={e => setKeyInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && saveKey()}
-                placeholder="AIzaSy..."
-                className="bg-black border border-cyan-900 text-cyan-300 px-3 py-3 text-sm w-full mb-3 focus:outline-none focus:border-cyan-600"
-              />
-              <button
-                onClick={saveKey}
-                className="w-full bg-cyan-900/40 text-cyan-300 py-2 text-xs border border-cyan-800 uppercase font-bold hover:bg-cyan-800/60 transition-colors"
-              >
-                \u5132\u5b58\u4e26\u958b\u59cb\u6383\u63cf
-              </button>
-            </div>
+      {/* Hero */}
+      <header className="mb-6 border-l-4 border-cyan-500 pl-4">
+        <h1 className="text-3xl font-black text-cyan-400 uppercase tracking-tighter">Mobile Terminal</h1>
+        <p className="text-[10px] text-cyan-900 mt-0.5 uppercase tracking-widest">手機科技情報站 · 繁體中文</p>
+        <div className="flex gap-3 mt-4 items-center">
+          <button onClick={() => runFetch()} disabled={loading}
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-2 transition-all
+              ${loading
+                ? 'border-gray-800 text-gray-700 cursor-not-allowed'
+                : 'border-cyan-600 text-cyan-400 hover:bg-cyan-600 hover:text-black'}`}>
+            <IcoRefresh spin={loading}/>
+            {loading ? '掃描中...' : '重新掃描'}
+          </button>
+          {lastUp && !loading && (
+            <span className="text-[10px] text-cyan-900 border border-cyan-900/30 px-3 py-2">
+              更新 {fmt(lastUp)}
+            </span>
           )}
+        </div>
+      </header>
 
-          {/* \u2500\u2500 Hero \u2500\u2500 */}
-          <header className="mb-6 border-l-4 border-cyan-500 pl-4">
-            <h1 className="text-3xl font-black text-cyan-400 uppercase tracking-tighter leading-none">Mobile Terminal</h1>
-            <p className="text-[10px] text-cyan-800 mt-1 uppercase tracking-widest">\u624b\u6a5f\u79d1\u6280\u60c5\u5831\u7ad9</p>
+      {/* Progress */}
+      {loading && (
+        <div className="mb-6 fadein">
+          <div className="flex justify-between text-[9px] text-cyan-900 mb-1">
+            <span>{status || '初始化...'}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full h-1 bg-gray-900">
+            <div className="h-full bg-cyan-500 glow transition-all duration-500" style={{width:`${progress}%`}}/>
+          </div>
+          <p className="text-[9px] text-gray-800 mt-1">分批搜尋，免費版約需 40-80 秒</p>
+        </div>
+      )}
 
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={() => runFetch()}
-                disabled={loading}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold border-2 transition-all
-                  ${loading
-                    ? 'bg-gray-900 border-gray-800 text-gray-600 cursor-not-allowed'
-                    : 'bg-cyan-950/20 border-cyan-600 text-cyan-400 hover:bg-cyan-600 hover:text-black'}`}
-              >
-                <IcoRefresh spin={loading} />
-                {loading ? '\u6383\u63cf\u4e2d...' : '\u91cd\u65b0\u6383\u63cf'}
-              </button>
-              {lastUpdate && !loading && (
-                <span className="flex items-center gap-1 text-[10px] text-cyan-900 border border-cyan-900/30 px-3">
-                  \u66f4\u65b0 {formatTime(lastUpdate)}
-                </span>
-              )}
+      {/* Error */}
+      {error && (
+        <div className="mb-5 border border-red-900 bg-red-950/20 px-4 py-3 text-xs text-red-400 fadein">
+          ⚠ {error}
+        </div>
+      )}
+
+      {/* Summary */}
+      {news.summaryBoard && !loading && (
+        <div className="mb-7 bg-cyan-950/10 border border-dashed border-cyan-900/40 p-4 fadein">
+          <p className="text-[9px] text-cyan-800 uppercase tracking-widest mb-2">今日重點摘要</p>
+          <p className="text-gray-300 text-sm leading-relaxed font-sans">{news.summaryBoard}</p>
+        </div>
+      )}
+
+      {/* Count */}
+      {news.newsItems.length > 0 && !loading && (
+        <div className="mb-4 text-[10px] text-cyan-900 uppercase tracking-wider">
+          共 <span className="text-cyan-500 font-bold">{news.newsItems.length}</span> 則 · 依熱度排序
+        </div>
+      )}
+
+      {/* News */}
+      <div className="grid gap-7">
+        {news.newsItems.map((item, i) => (
+          <article key={i} className="border-b border-gray-800/40 pb-7 fadein"
+            style={{ animationDelay:`${Math.min(i*0.03,0.6)}s` }}>
+            <div className="flex flex-wrap gap-1.5 mb-2 items-center">
+              <span className="bg-white text-black text-[10px] font-black px-2 py-0.5 uppercase">{item.brand||'—'}</span>
+              <span className="border border-cyan-800 text-cyan-700 text-[10px] px-2 py-0.5">{item.time}</span>
+              <span className="text-gray-700 text-[9px] ml-auto truncate max-w-[120px]">{item.source}</span>
             </div>
-          </header>
+            <h2 className="text-base font-bold text-gray-100 leading-snug mb-0.5">{item.titleZh}</h2>
+            <h3 className="text-[9px] text-cyan-900 font-bold uppercase tracking-wide">{item.titleEn}</h3>
+            <ScoreBar score={item.score}/>
+            <p className="text-sm text-gray-400 whitespace-pre-line leading-relaxed font-sans mb-4">{item.summary}</p>
+            <button onClick={() => openLink(item.url)}
+              className="inline-flex items-center gap-2 text-[11px] font-bold text-cyan-600 border border-cyan-900 px-4 py-2 hover:bg-cyan-600 hover:text-black transition-all active:scale-95">
+              查看原文 <IcoLink/>
+            </button>
+          </article>
+        ))}
+      </div>
 
-          {/* \u2500\u2500 Progress bar \u2500\u2500 */}
-          {
+      {/* Empty */}
+      {!loading && news.newsItems.length===0 && !error && (
+        <div className="text-center py-24 text-cyan-900 text-xs uppercase tracking-widest">
+          {apiKey ? '尚無資料，點擊重新掃描' : '請先設定 Gemini API 金鑰'}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
