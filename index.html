@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mobile Terminal</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <meta name="theme-color" content="#050505">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TechTerm">
+  
+  <script>
+    const manifest = {
+      "name": "Mobile Tech Terminal",
+      "short_name": "TechTerm",
+      "start_url": ".",
+      "display": "standalone",
+      "background_color": "#050505",
+      "theme_color": "#050505",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMwNTA1MDUiLz48cGF0aCBkPSJNMjU2IDQwYTIxNiAyMTYgMCAxIDAgMCA0MzIgMjE2IDIxNiAwIDAgMCAwLTQzMnptMCA0MDBBMTg0IDE4NCAwIDEgMSAyNTYgNzJhMTg0IDE4NCAwIDAgMSAwIDM2OHoiIGZpbGw9IiMyMmQzZWUiLz48cGF0aCBkPSJNMTY0IDI1Nmw2NC02NHYxMjh6TTM0OCAyNTZsLTY0IDY0VjEyOHoiIGZpbGw9IiMyMmQzZWUiLz48L3N2Zz4=",
+          "sizes": "512x512",
+          "type": "image/svg+xml"
+        }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    document.write(`<link rel="manifest" href="${manifestURL}">`);
+  </script>
+
+  <style>
+    body { background-color: #050505; color: #ecfeff; font-family: monospace; }
+    ::-webkit-scrollbar { width: 0px; background: transparent; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const Icons = {
+      Terminal: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>,
+      Key: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"></path><path d="m21 2-9.6 9.6"></path><circle cx="7.5" cy="15.5" r="5.5"></circle></svg>,
+      Save: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>,
+      Trash: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>,
+      Refresh: ({className}) => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>,
+      Alert: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>,
+      Twitter: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>,
+      Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>,
+      Clock: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
+      Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
+      ExternalLink: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+    };
+
+    function App() {
+      const [news, setNews] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState(null);
+      const [lastUpdated, setLastUpdated] = useState(null);
+      const [apiKey, setApiKey] = useState('');
+      const [isKeySaved, setIsKeySaved] = useState(false);
+      const [showKeySettings, setShowKeySettings] = useState(true);
+
+      useEffect(() => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) {
+          setApiKey(savedKey);
+          setIsKeySaved(true);
+          setShowKeySettings(false);
+        }
+      }, []);
+
+      const saveApiKey = () => {
+        if (!apiKey.trim()) {
+          setError("請輸入有效的 API Key");
+          return;
+        }
+        localStorage.setItem('gemini_api_key', apiKey.trim());
+        setIsKeySaved(true);
+        setShowKeySettings(false);
+        setError(null);
+      };
+
+      const removeApiKey = () => {
+        localStorage.removeItem('gemini_api_key');
+        setApiKey('');
+        setIsKeySaved(false);
+        setShowKeySettings(true);
+        setNews([]);
+      };
+
+      const fetchTechNews = async () => {
+        if (!apiKey) {
+          setError("請先設定 Gemini API Key 才能啟動掃描。");
+          setShowKeySettings(true);
+          return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+          
+          const promptText = `
+            任務：搜尋過去24小時內網路上關於「智慧型手機、硬體規格爆料」的4條最重要情報。
+            必須嚴格以 JSON 回傳，格式如下：
+            {
+              "newsItems": [
+                {
+                  "title": "標題",
+                  "summary": "繁體中文摘要(約50字)",
+                  "sourcePlatform": "來源平台",
+                  "sourceAccount": "作者或帳號",
+                  "publishTime": "時間估算",
+                  "url": "真實連結",
+                  "hypeScore": 1-100的熱度評分
+                }
+              ]
+            }
+          `;
+
+          const payload = {
+            contents: [{ parts: [{ text: promptText }] }],
+            tools: [{ google_search: {} }],
+            generationConfig: { responseMimeType: "application/json" }
+          };
+
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            if (response.status === 400 || response.status === 403) throw new Error("API Key 無效或不支援搜尋功能。");
+            throw new Error(`連線失敗: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          
+          if (responseText) {
+            const parsedData = JSON.parse(responseText);
+            if (parsedData.newsItems && parsedData.newsItems.length > 0) {
+               setNews(parsedData.newsItems);
+               setLastUpdated(new Date());
+            } else {
+               throw new Error("未能找到情報。");
+            }
+          }
+        } catch (err) {
+          setError(err.message || "連線網路失敗。");
+          if (err.message.includes("API Key")) setShowKeySettings(true);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="p-3 sm:p-6 max-w-4xl mx-auto pb-20">
+          
+          <div className="flex justify-between items-center mb-6 text-[10px] text-cyan-600/60 font-bold tracking-widest border-b border-cyan-900/30 pb-2">
+            <span className="flex items-center gap-2"><Icons.Terminal /> SYSTEM_V4_SECURE</span>
+            <button onClick={() => setShowKeySettings(!showKeySettings)} className="flex items-center gap-1 hover:text-cyan-400">
+              <Icons.Key /> {isKeySaved ? 'KEY_LOADED (點擊修改)' : 'KEY_REQUIRED'}
+            </button>
+          </div>
+
+          {showKeySettings && (
+            <div className="mb-6 p-4 border border-cyan-800 bg-[#0a0c10] rounded-sm">
+              <h3 className="text-sm font-bold text-cyan-400 mb-2 flex items-center gap-2">
+                <Icons.Key /> Security Config
+              </h3>
+              <p className="text-xs text-gray-400 mb-3 font-sans">
+                請輸入 Google Gemini API Key。金鑰僅儲存於您的設備。
+              </p>
+              <div className="flex flex-col gap-2">
+                <input 
+                  type="password" 
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="AIzaSy..." 
+                  className="bg-black border border-cyan-900 text-cyan-300 px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 w-full"
+                />
+                <div className="flex gap-2">
+                  <button onClick={saveApiKey} className="flex-1 flex items-center justify-center gap-2 bg-cyan-900/50 text-cyan-300 py-2 text-xs border border-cyan-800">
+                    <Icons.Save /> 儲存
+                  </button>
+                  {isKeySaved && (
+                    <button onClick={removeApiKey} className="px-4 bg-red-900/20 text-red-400 border border-red-900/50">
+                      <Icons.Trash />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <header className="mb-8 border-l-2 border-cyan-500 pl-4 flex flex-col gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-cyan-600 uppercase tracking-tight">
+                Mobile Terminal
+              </h1>
+              <div className="text-xs text-gray-500 uppercase mt-1">Intelligence Network</div>
+            </div>
+
+            <button 
+              onClick={fetchTechNews}
+              disabled={loading || !isKeySaved}
+              className={`flex items-center justify-center gap-2 py-3 w-full sm:w-auto sm:px-8 text-sm font-bold tracking-widest uppercase border
+                ${loading || !isKeySaved ? 'bg-gray-900 text-gray-600 border-gray-800' : 'bg-cyan-950/30 text-cyan-400 border-cyan-800 hover:bg-cyan-900/50 active:bg-cyan-800'}`}
+            >
+              <Icons.Refresh className={loading ? "animate-spin" : ""} />
+              <span>{loading ? 'Scanning...' : 'Initiate Scan'}</span>
+            </button>
+          </header>
+
+          {error && (
+            <div className="bg-red-950/20 border border-red-900/50 p-3 mb-6 flex items-start gap-3 text-red-400 text-xs">
+              <Icons.Alert /> {error}
+            </div>
+          )}
+
+          <div className="grid gap-4">
+            {news.map((item, index) => (
+              <article key={index} className="bg-[#0a0c10] border border-gray-800 p-4">
+                <div className="flex flex-col gap-2 mb-3">
+                  <div className="flex items-center gap-2 text-[10px] uppercase">
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black border border-gray-800 text-gray-300"><Icons.Twitter /> {item.sourcePlatform}</div>
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-cyan-950/20 text-cyan-400 border border-cyan-900/30"><Icons.Cpu /> {item.sourceAccount}</div>
+                    <div className="text-gray-500 ml-auto"><Icons.Clock /> {item.publishTime}</div>
+                  </div>
+                  <div className="text-xs font-bold text-cyan-500 flex items-center gap-1"><Icons.Zap /> HYPE: {item.hypeScore}</div>
+                </div>
+                
+                <h2 className="text-base font-bold text-gray-100 mb-2">{item.title}</h2>
+                <p className="text-gray-400 text-xs font-sans leading-relaxed mb-4">{item.summary}</p>
+
+                <div className="border-t border-gray-800/50 pt-3 text-right">
+                  <a href={item.url} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-cyan-600 uppercase border border-cyan-900 px-3 py-1.5 active:bg-cyan-900">
+                    Access Link <Icons.ExternalLink />
+                  </a>
+                </div>
+              </article>
+            ))}
+            {news.length === 0 && isKeySaved && !loading && !error && (
+               <div className="text-center py-12 text-gray-600 text-xs uppercase border border-dashed border-gray-800">Awaiting Initialization</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
+
+
