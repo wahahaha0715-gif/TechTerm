@@ -2,549 +2,435 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TechTerm V6</title>
-<meta name="theme-color" content="#050505">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TechTerm</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:#050505;color:#ecfeff;font-family:'Courier New',Courier,monospace;min-height:100vh;}
+:root{
+  --bg:#060608;
+  --surface:#0d0f14;
+  --border:#1a2030;
+  --cyan:#22d3ee;
+  --cyan-dim:#0e7490;
+  --cyan-dark:#082030;
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --faint:#1e293b;
+  --red:#ef4444;
+  --red-bg:#1a0a0a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;min-height:100%;width:100%}
+body{padding:0 0 80px}
 
-  /* Scanline */
-  #scanline{position:fixed;left:0;right:0;height:2px;top:-2px;
-    background:linear-gradient(transparent,rgba(34,211,238,.18),transparent);
-    animation:scan 6s linear infinite;pointer-events:none;z-index:9999;}
-  @keyframes scan{0%{top:-2px}100%{top:100vh}}
+/* ── layout ── */
+.wrap{max-width:480px;margin:0 auto;padding:16px}
 
-  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-  .fadein{animation:fadein .35s ease both;}
+/* ── topbar ── */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+.logo{font-size:10px;font-weight:700;color:var(--cyan-dim);letter-spacing:.1em;display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.keybtn{font-size:10px;font-weight:700;font-family:inherit;letter-spacing:.06em;border:1px solid var(--border);background:none;color:var(--muted);padding:4px 10px;cursor:pointer}
+.keybtn.ok{color:var(--cyan-dim);border-color:var(--cyan-dim)}
+.keybtn.bad{color:var(--red);border-color:var(--red)}
 
-  /* Layout */
-  #app{max-width:520px;margin:0 auto;padding:16px 16px 96px;}
+/* ── key panel ── */
+.keypanel{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:20px;display:none}
+.keypanel.show{display:block}
+.kp-label{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.kp-hint{font-size:9px;color:var(--faint);margin-bottom:12px}
+.kp-hint a{color:var(--cyan-dim)}
+.kp-input{width:100%;background:#000;border:1px solid var(--border);color:var(--cyan);padding:12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;border-radius:0;-webkit-appearance:none}
+.kp-input:focus{border-color:var(--cyan-dim)}
+.kp-save{width:100%;background:var(--cyan-dark);border:1px solid var(--cyan-dim);color:var(--cyan);padding:11px;font-size:11px;font-family:inherit;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.kp-save:active{background:var(--cyan);color:#000}
 
-  /* Top bar */
-  #topbar{display:flex;justify-content:space-between;align-items:center;
-    border-bottom:1px solid rgba(34,211,238,.12);padding-bottom:8px;margin-bottom:20px;
-    font-size:10px;font-weight:700;letter-spacing:.05em;}
-  #topbar .logo{display:flex;align-items:center;gap:6px;color:#22d3ee;}
-  #keyBtn{background:none;border:none;color:#164e63;cursor:pointer;font-family:inherit;
-    font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;padding:4px 6px;}
-  #keyBtn.ok{color:#0e7490;}
-  #keyBtn.bad{color:#ef4444;}
+/* ── hero ── */
+.hero{border-left:3px solid var(--cyan);padding-left:14px;margin-bottom:24px}
+.hero h1{font-size:26px;font-weight:900;color:var(--cyan);text-transform:uppercase;letter-spacing:-.02em;line-height:1}
+.hero-sub{font-size:9px;color:var(--faint);letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+.hero-row{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.scan-btn{display:flex;align-items:center;gap:7px;padding:11px 18px;font-size:11px;font-weight:700;font-family:inherit;letter-spacing:.08em;text-transform:uppercase;border:2px solid var(--cyan-dim);color:var(--cyan);background:none;cursor:pointer;transition:all .15s}
+.scan-btn:not(:disabled):active{background:var(--cyan);color:#000}
+.scan-btn:disabled{border-color:var(--border);color:var(--faint);cursor:not-allowed}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-up{font-size:9px;color:var(--faint);border:1px solid var(--border);padding:5px 10px;display:none}
 
-  /* Key panel */
-  #keyPanel{display:none;margin-bottom:20px;padding:16px;border:1px solid #155e75;background:#080c10;}
-  #keyPanel p{font-size:10px;color:#0e7490;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
-  #keyPanel small{font-size:9px;color:#374151;display:block;margin-bottom:12px;}
-  #keyInput{width:100%;background:#000;border:1px solid #155e75;color:#67e8f9;
-    padding:12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;}
-  #keyInput:focus{border-color:#22d3ee;}
-  #saveBtn{width:100%;background:rgba(14,116,144,.3);border:1px solid #155e75;
-    color:#67e8f9;padding:10px;font-size:11px;font-family:inherit;font-weight:700;
-    text-transform:uppercase;cursor:pointer;letter-spacing:.08em;}
-  #saveBtn:hover{background:rgba(14,116,144,.5);}
+/* ── progress ── */
+.prog-box{display:none;margin-bottom:22px}
+.prog-row{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:5px}
+.prog-track{width:100%;height:3px;background:var(--faint)}
+.prog-fill{height:3px;background:var(--cyan);width:0%;transition:width .6s ease;box-shadow:0 0 8px var(--cyan)}
+.prog-hint{font-size:9px;color:var(--border);margin-top:5px}
 
-  /* Hero */
-  #hero{border-left:4px solid #22d3ee;padding-left:16px;margin-bottom:24px;}
-  #hero h1{font-size:28px;font-weight:900;color:#22d3ee;text-transform:uppercase;letter-spacing:-.03em;line-height:1;}
-  #hero p{font-size:9px;color:#164e63;text-transform:uppercase;letter-spacing:.15em;margin-top:4px;}
-  #heroRow{display:flex;gap:10px;align-items:center;margin-top:16px;}
-  #scanBtn{display:flex;align-items:center;gap:8px;padding:12px 20px;
-    font-size:11px;font-weight:700;font-family:inherit;text-transform:uppercase;
-    border:2px solid #0e7490;color:#22d3ee;background:rgba(8,70,92,.15);cursor:pointer;transition:.2s;}
-  #scanBtn:hover:not(:disabled){background:#22d3ee;color:#000;}
-  #scanBtn:disabled{border-color:#1f2937;color:#374151;cursor:not-allowed;}
-  #scanBtn svg{flex-shrink:0;}
-  #lastUp{font-size:10px;color:#164e63;border:1px solid rgba(34,211,238,.1);padding:8px 12px;}
+/* ── error ── */
+.err-box{display:none;background:var(--red-bg);border:1px solid var(--red);color:var(--red);font-size:12px;padding:12px 14px;margin-bottom:18px;line-height:1.5}
 
-  /* Progress */
-  #progressBox{display:none;margin-bottom:24px;}
-  #progressRow{display:flex;justify-content:space-between;font-size:9px;color:#164e63;margin-bottom:6px;}
-  #progressBar{width:100%;height:4px;background:#111;position:relative;overflow:hidden;}
-  #progressFill{height:100%;background:#22d3ee;width:0%;transition:width .5s ease;
-    box-shadow:0 0 10px rgba(34,211,238,.5);}
-  #progressHint{font-size:9px;color:#1f2937;margin-top:6px;}
+/* ── summary ── */
+.summary-box{display:none;background:var(--surface);border:1px solid var(--border);padding:14px;margin-bottom:24px}
+.summary-label{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.summary-text{font-size:13px;color:#94a3b8;line-height:1.7;font-family:system-ui,sans-serif}
 
-  /* Error */
-  #errorBox{display:none;margin-bottom:20px;border:1px solid #7f1d1d;
-    background:rgba(127,29,29,.1);padding:12px 16px;font-size:12px;color:#f87171;}
+/* ── count ── */
+.count{display:none;font-size:9px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.count b{color:var(--cyan)}
 
-  /* Summary */
-  #summaryBox{display:none;margin-bottom:28px;border:1px dashed rgba(34,211,238,.2);
-    background:rgba(8,70,92,.06);padding:16px;}
-  #summaryBox .label{font-size:9px;color:#164e63;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;}
-  #summaryText{font-size:14px;color:#d1d5db;line-height:1.7;font-family:system-ui,sans-serif;}
+/* ── cards ── */
+.cards{display:flex;flex-direction:column;gap:0}
+.card{border-bottom:1px solid var(--border);padding:20px 0;animation:fadein .3s ease both}
+@keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.brand-tag{background:var(--text);color:var(--bg);font-size:9px;font-weight:900;padding:2px 7px;letter-spacing:.04em;text-transform:uppercase}
+.time-tag{border:1px solid var(--border);color:var(--muted);font-size:9px;padding:2px 7px}
+.src-tag{font-size:9px;color:var(--faint);margin-left:auto;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.title-zh{font-size:15px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:2px}
+.title-en{font-size:9px;color:var(--faint);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.hot-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.hot-track{flex:1;height:1px;background:var(--faint)}
+.hot-fill{height:1px}
+.hot-label{font-size:9px;font-weight:700;white-space:nowrap}
+.card-summary{font-size:13px;color:#64748b;line-height:1.65;white-space:pre-line;font-family:system-ui,sans-serif;margin-bottom:14px}
+.link-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;font-family:inherit;color:var(--cyan-dim);border:1px solid var(--border);padding:8px 14px;background:none;cursor:pointer;letter-spacing:.04em}
+.link-btn:active{background:var(--cyan);color:#000;border-color:var(--cyan)}
 
-  /* Count */
-  #countBadge{display:none;font-size:10px;color:#164e63;text-transform:uppercase;
-    letter-spacing:.08em;margin-bottom:16px;}
-  #countBadge span{color:#22d3ee;font-weight:700;}
+/* ── empty ── */
+.empty{display:none;text-align:center;padding:64px 0;font-size:10px;color:var(--faint);letter-spacing:.14em;text-transform:uppercase}
 
-  /* News list */
-  #newsList{display:grid;gap:28px;}
-  .card{border-bottom:1px solid rgba(255,255,255,.05);padding-bottom:28px;}
-  .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
-  .brand{background:#fff;color:#000;font-size:9px;font-weight:900;
-    padding:2px 6px;text-transform:uppercase;letter-spacing:.05em;}
-  .time{border:1px solid #155e75;color:#0e7490;font-size:9px;padding:2px 6px;}
-  .src{font-size:9px;color:#374151;margin-left:auto;max-width:120px;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .titleZh{font-size:15px;font-weight:700;color:#f3f4f6;line-height:1.35;margin-bottom:2px;}
-  .titleEn{font-size:9px;color:#164e63;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-  .hotrow{display:flex;align-items:center;gap:8px;margin:8px 0 12px;}
-  .hotbar{flex:1;height:1px;background:#111;overflow:hidden;}
-  .hotfill{height:1px;}
-  .hotscore{font-size:9px;font-weight:700;}
-  .summary{font-size:13px;color:#9ca3af;line-height:1.65;white-space:pre-line;
-    font-family:system-ui,sans-serif;margin-bottom:14px;}
-  .linkBtn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
-    color:#0e7490;border:1px solid #155e75;padding:8px 16px;background:none;
-    font-family:inherit;cursor:pointer;transition:.2s;text-decoration:none;}
-  .linkBtn:hover,.linkBtn:active{background:#22d3ee;color:#000;border-color:#22d3ee;}
-
-  /* Empty */
-  #empty{display:none;text-align:center;padding:80px 0;font-size:11px;
-    color:#164e63;text-transform:uppercase;letter-spacing:.15em;}
-
-  ::-webkit-scrollbar{width:3px;}
-  ::-webkit-scrollbar-thumb{background:#164e63;}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:var(--faint)}
 </style>
 </head>
 <body>
-<div id="scanline"></div>
-<div id="app">
+<div class="wrap">
 
-  <!-- Top bar -->
-  <div id="topbar">
-    <div class="logo">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-      TECH_TERM_V6
-    </div>
-    <button id="keyBtn" class="bad" onclick="toggleKeyPanel()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>
-      <span id="keyLabel">KEY_MISSING</span>
-    </button>
+  <!-- topbar -->
+  <div class="topbar">
+    <div class="logo"><span class="dot"></span>TECH_TERM_V7</div>
+    <button class="keybtn bad" id="keyBtn" onclick="toggleKey()">⚿ KEY_MISSING</button>
   </div>
 
-  <!-- Key panel -->
-  <div id="keyPanel">
-    <p>Gemini API Key</p>
-    <small>免費版取得：aistudio.google.com/apikey</small>
-    <input id="keyInput" type="password" placeholder="AIzaSy..." autocomplete="off">
-    <button id="saveBtn" onclick="saveKey()">儲存並開始掃描</button>
+  <!-- key panel -->
+  <div class="keypanel" id="keyPanel">
+    <div class="kp-label">Gemini API Key（免費版）</div>
+    <div class="kp-hint">取得金鑰：<a href="#" onclick="openLink('https://aistudio.google.com/apikey')">aistudio.google.com/apikey</a></div>
+    <input class="kp-input" id="keyInput" type="password" placeholder="AIzaSy..." autocomplete="off">
+    <button class="kp-save" onclick="saveKey()">儲存並開始掃描</button>
   </div>
 
-  <!-- Hero -->
-  <div id="hero">
-    <h1>Mobile Terminal</h1>
-    <p>手機科技情報站 · 繁體中文</p>
-    <div id="heroRow">
-      <button id="scanBtn" onclick="startScan()">
-        <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        <span id="scanLabel">重新掃描</span>
+  <!-- hero -->
+  <div class="hero">
+    <h1>Mobile<br>Terminal</h1>
+    <div class="hero-sub">手機科技情報站 · 繁體中文</div>
+    <div class="hero-row">
+      <button class="scan-btn" id="scanBtn" onclick="startScan()">
+        <svg id="scanIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <span id="scanTxt">重新掃描</span>
       </button>
-      <div id="lastUp" style="display:none;"></div>
+      <div class="last-up" id="lastUp"></div>
     </div>
   </div>
 
-  <!-- Progress -->
-  <div id="progressBox">
-    <div id="progressRow">
-      <span id="progressMsg">初始化...</span>
-      <span id="progressPct">0%</span>
-    </div>
-    <div id="progressBar"><div id="progressFill"></div></div>
-    <div id="progressHint">分批搜尋中，免費版約需 40-90 秒</div>
+  <!-- progress -->
+  <div class="prog-box" id="progBox">
+    <div class="prog-row"><span id="progMsg">初始化...</span><span id="progPct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-hint">分批搜尋，免費版約需 40–90 秒，請稍候</div>
   </div>
 
-  <!-- Error -->
-  <div id="errorBox"></div>
+  <!-- error -->
+  <div class="err-box" id="errBox"></div>
 
-  <!-- Summary -->
-  <div id="summaryBox">
-    <div class="label">今日重點摘要</div>
-    <div id="summaryText"></div>
+  <!-- summary -->
+  <div class="summary-box" id="sumBox">
+    <div class="summary-label">今日重點摘要</div>
+    <div class="summary-text" id="sumText"></div>
   </div>
 
-  <!-- Count -->
-  <div id="countBadge"></div>
+  <!-- count -->
+  <div class="count" id="countEl"></div>
 
-  <!-- News list -->
-  <div id="newsList"></div>
+  <!-- cards -->
+  <div class="cards" id="cards"></div>
 
-  <!-- Empty -->
-  <div id="empty">尚無資料，點擊重新掃描</div>
+  <!-- empty -->
+  <div class="empty" id="empty">尚無資料，點擊重新掃描</div>
 
 </div>
 
 <script>
-/* ── State ──────────────────────────────────────────── */
-var apiKey = '';
-var isLoading = false;
-var progressVal = 0;
-var progressTimer = null;
+// ── state ────────────────────────────────────────────
+var KEY_STORE = 'tt7_key';
+var CACHE_STORE = 'tt7_cache';
+var CACHE_TTL = 25 * 60 * 1000;
+var busy = false;
+var progTimer = null;
+var progVal = 0;
 
-/* ── Init ───────────────────────────────────────────── */
-window.addEventListener('DOMContentLoaded', function() {
-  var k = localStorage.getItem('gemini_key') || '';
-  apiKey = k;
-  document.getElementById('keyInput').value = k;
-  updateKeyUI();
-
-  if (!k) {
-    showKeyPanel(true);
-    showEmpty();
-    return;
+// ── boot ────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var k = ls(KEY_STORE);
+  if (k) {
+    setKeyUI(k);
+    var hit = getCache();
+    if (hit) { render(hit); return; }
+    startScan();
+  } else {
+    show('keyPanel');
+    show('empty');
   }
-
-  // Try cache first
-  var cached = loadCache();
-  if (cached) {
-    renderData(cached.d);
-    var t = new Date(cached.ts);
-    showLastUpdate(t);
-    return;
-  }
-
-  // Auto-fetch
-  startScan();
 });
 
-/* ── Key UI ─────────────────────────────────────────── */
-function updateKeyUI() {
-  var btn = document.getElementById('keyBtn');
-  var lbl = document.getElementById('keyLabel');
-  if (apiKey) {
-    btn.className = 'ok';
-    lbl.textContent = 'KEY_OK';
-  } else {
-    btn.className = 'bad';
-    lbl.textContent = 'KEY_MISSING';
-  }
-}
+// ── localStorage safe ────────────────────────────────
+function ls(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
 
-function toggleKeyPanel() {
-  var p = document.getElementById('keyPanel');
-  p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}
-
-function showKeyPanel(show) {
-  document.getElementById('keyPanel').style.display = show ? 'block' : 'none';
-}
-
-function saveKey() {
-  var val = document.getElementById('keyInput').value.trim();
-  if (!val) return;
-  apiKey = val;
-  localStorage.setItem('gemini_key', val);
-  updateKeyUI();
-  showKeyPanel(false);
-  showError('');
-  if (document.getElementById('newsList').children.length === 0) {
-    startScan();
-  }
-}
-
-/* ── Progress ───────────────────────────────────────── */
-function setProgress(pct, msg) {
-  progressVal = pct;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = Math.round(pct) + '%';
-  if (msg) document.getElementById('progressMsg').textContent = msg;
-}
-
-function startProgressTick() {
-  clearInterval(progressTimer);
-  progressTimer = setInterval(function() {
-    if (progressVal < 80) {
-      progressVal += (80 - progressVal) * 0.03;
-      document.getElementById('progressFill').style.width = progressVal + '%';
-      document.getElementById('progressPct').textContent = Math.round(progressVal) + '%';
-    }
-  }, 500);
-}
-
-function stopProgressTick() {
-  clearInterval(progressTimer);
-}
-
-/* ── Show/hide helpers ──────────────────────────────── */
-function showLoading(on) {
-  document.getElementById('progressBox').style.display = on ? 'block' : 'none';
-  var btn = document.getElementById('scanBtn');
-  var icon = document.getElementById('refreshIcon');
-  var lbl = document.getElementById('scanLabel');
-  btn.disabled = on;
-  icon.style.animation = on ? 'spin 1s linear infinite' : '';
-  lbl.textContent = on ? '掃描中...' : '重新掃描';
-}
-
-function showError(msg) {
-  var el = document.getElementById('errorBox');
-  if (msg) { el.textContent = '⚠ ' + msg; el.style.display = 'block'; }
-  else { el.style.display = 'none'; }
-}
-
-function showLastUpdate(d) {
-  var el = document.getElementById('lastUp');
-  var h = ('0'+d.getHours()).slice(-2);
-  var m = ('0'+d.getMinutes()).slice(-2);
-  el.textContent = '更新 ' + h + ':' + m;
-  el.style.display = 'block';
-}
-
-function showEmpty() {
-  document.getElementById('empty').style.display = 'block';
-}
-
-/* ── Cache ──────────────────────────────────────────── */
-var CK = 'tt_v6';
-var TTL = 25 * 60 * 1000;
-
-function saveCache(d) {
-  try { localStorage.setItem(CK, JSON.stringify({ts: Date.now(), d: d})); } catch(e) {}
-}
-
-function loadCache() {
-  try {
-    var r = localStorage.getItem(CK);
-    if (!r) return null;
-    var obj = JSON.parse(r);
-    if (Date.now() - obj.ts < TTL) return obj;
-    localStorage.removeItem(CK);
-  } catch(e) {}
+// ── cache ────────────────────────────────────────────
+function setCache(d){ lsSet(CACHE_STORE, JSON.stringify({ts:Date.now(),d:d})); }
+function getCache(){
+  try{
+    var raw = ls(CACHE_STORE);
+    if(!raw) return null;
+    var o = JSON.parse(raw);
+    if(Date.now()-o.ts < CACHE_TTL) return o.d;
+    lsDel(CACHE_STORE);
+  }catch(e){}
   return null;
 }
 
-/* ── Open link (WebIntoApp safe) ────────────────────── */
-function openLink(url) {
-  if (!url || url.indexOf('http') !== 0) return;
-  try {
-    var a = document.createElement('a');
-    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    return;
-  } catch(e) {}
-  try { window.open(url, '_blank'); } catch(e) {}
-  try { window.location.href = url; } catch(e) {}
+// ── show/hide ────────────────────────────────────────
+function show(id){ document.getElementById(id).style.display=''; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function el(id){ return document.getElementById(id); }
+
+// ── key helpers ──────────────────────────────────────
+function toggleKey(){
+  var p = el('keyPanel');
+  p.classList.toggle('show');
+}
+function setKeyUI(k){
+  var b = el('keyBtn');
+  if(k){ b.className='keybtn ok'; b.textContent='⚿ KEY_OK'; }
+  else { b.className='keybtn bad'; b.textContent='⚿ KEY_MISSING'; }
+}
+function saveKey(){
+  var v = el('keyInput').value.trim();
+  if(!v) return;
+  lsSet(KEY_STORE, v);
+  setKeyUI(v);
+  el('keyPanel').classList.remove('show');
+  setErr('');
+  hide('empty');
+  startScan();
 }
 
-/* ── Gemini API call ────────────────────────────────── */
-function callGemini(prompt, useSearch, maxTokens) {
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+// ── progress ─────────────────────────────────────────
+function setP(pct, msg){
+  progVal = pct;
+  el('progFill').style.width = pct+'%';
+  el('progPct').textContent = Math.round(pct)+'%';
+  if(msg) el('progMsg').textContent = msg;
+}
+function tickP(){
+  clearInterval(progTimer);
+  progTimer = setInterval(function(){
+    if(progVal < 82){ progVal += (82-progVal)*0.025; el('progFill').style.width=progVal+'%'; el('progPct').textContent=Math.round(progVal)+'%'; }
+  }, 600);
+}
+function stopP(){ clearInterval(progTimer); }
+
+// ── error ─────────────────────────────────────────────
+function setErr(msg){
+  var b = el('errBox');
+  if(msg){ b.textContent='⚠ '+msg; b.style.display='block'; }
+  else { b.style.display='none'; }
+}
+
+// ── open link ─────────────────────────────────────────
+function openLink(url){
+  if(!url||url.indexOf('http')!==0) return;
+  try{ var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a); return; }catch(e){}
+  try{ window.open(url,'_blank'); }catch(e){}
+}
+
+// ── html escape ───────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Gemini fetch ──────────────────────────────────────
+function callAPI(prompt, useSearch, maxTok){
+  var k = ls(KEY_STORE);
+  if(!k) return Promise.reject(new Error('NO_KEY'));
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+k;
   var body = {
-    contents: [{parts: [{text: prompt}]}],
-    generationConfig: {temperature: 0.25, maxOutputTokens: maxTokens || 5000}
+    contents:[{parts:[{text:prompt}]}],
+    generationConfig:{temperature:0.25, maxOutputTokens: maxTok||5000}
   };
-  if (useSearch) body.tools = [{google_search: {}}];
-
-  return fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(body)
-  }).then(function(res) {
-    return res.json().then(function(data) {
-      if (!res.ok) {
-        var msg = (data && data.error && data.error.message) || ('HTTP ' + res.status);
-        throw new Error(msg);
-      }
-      var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
-      var text = parts.map(function(p){ return p.text || ''; }).join('');
-      // Strip markdown fences
-      text = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-      return text;
+  if(useSearch) body.tools=[{google_search:{}}];
+  return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){
+      return r.json().then(function(d){
+        if(!r.ok) throw new Error((d&&d.error&&d.error.message)||('HTTP '+r.status));
+        var parts=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts)||[];
+        var txt=parts.map(function(p){return p.text||'';}).join('');
+        return txt.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      });
     });
-  });
 }
 
-/* ── Parse JSON from Gemini text ────────────────────── */
-function parseItems(text) {
-  var match = text.match(/\{[\s\S]*\}/);
-  if (!match) return [];
-  try {
-    var obj = JSON.parse(match[0]);
-    return Array.isArray(obj.newsItems) ? obj.newsItems : [];
-  } catch(e) {
-    // Try to close truncated JSON
-    try {
-      var fixed = match[0].replace(/,\s*$/, '') + ']}';
-      var obj2 = JSON.parse(fixed);
-      return Array.isArray(obj2.newsItems) ? obj2.newsItems : [];
-    } catch(e2) { return []; }
-  }
+// ── parse JSON items ──────────────────────────────────
+function parseItems(txt){
+  var m=txt.match(/\{[\s\S]*\}/);
+  if(!m) return [];
+  try{ var o=JSON.parse(m[0]); return Array.isArray(o.newsItems)?o.newsItems:[]; }catch(e){}
+  try{ var o2=JSON.parse(m[0].replace(/,\s*$/,'')+']}'); return Array.isArray(o2.newsItems)?o2.newsItems:[]; }catch(e){}
+  return [];
 }
 
-/* ── Delay helper ───────────────────────────────────── */
-function delay(ms) {
-  return new Promise(function(r){ setTimeout(r, ms); });
+function wait(ms){ return new Promise(function(r){setTimeout(r,ms);}); }
+
+// ── prompt builder ────────────────────────────────────
+function buildPrompt(exclude){
+  var now = new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei'});
+  var ex = exclude && exclude.length ? '以下標題已存在，請找不重複的：'+exclude.join('；')+'\n\n' : '';
+  return '現在台灣時間：'+now+'。你是科技新聞編輯，任務是搜尋並整理最新手機科技資訊。\n'+
+    ex+
+    '【絕對規定】所有中文必須使用繁體中文，嚴禁任何簡體字。品牌型號保留英文。\n\n'+
+    '請用 Google Search 搜尋過去 24 小時內智慧型手機、平板、穿戴裝置最新消息（規格洩漏、新品發布、評測、韌體更新等）。\n\n'+
+    '回傳 10 筆新聞。僅輸出純 JSON，不加任何說明文字、不加 markdown 符號：\n'+
+    '{"newsItems":[{"brand":"英文品牌","titleZh":"繁體標題","titleEn":"English subtitle","summary":"繁體摘要2-3句\\n英文1-2句","source":"來源網站","time":"X小時前","url":"https://完整網址","score":85}]}\n\n'+
+    'score=熱度0-100，url必須是完整https網址。';
 }
 
-/* ── Main scan ──────────────────────────────────────── */
-function startScan() {
-  if (isLoading) return;
-  if (!apiKey) { showKeyPanel(true); return; }
+// ── main scan ─────────────────────────────────────────
+function startScan(){
+  if(busy) return;
+  var k = ls(KEY_STORE);
+  if(!k){ el('keyPanel').classList.add('show'); return; }
+  busy=true;
 
-  isLoading = true;
-  showError('');
-  showLoading(true);
-  setProgress(5, '第一批搜尋中... (1/3)');
-  startProgressTick();
+  // reset UI
+  setErr('');
+  el('sumBox').style.display='none';
+  el('countEl').style.display='none';
+  el('empty').style.display='none';
+  el('cards').innerHTML='';
+  el('progBox').style.display='block';
+  el('scanBtn').disabled=true;
+  el('scanIcon').classList.add('spin');
+  el('scanTxt').textContent='掃描中...';
+  setP(5,'第一批搜尋中... (1/3)');
+  tickP();
 
-  // Clear old display
-  document.getElementById('summaryBox').style.display = 'none';
-  document.getElementById('countBadge').style.display = 'none';
-  document.getElementById('empty').style.display = 'none';
-  document.getElementById('newsList').innerHTML = '';
+  var items1=[], items2=[];
 
-  var now = new Date().toLocaleString('zh-TW', {timeZone: 'Asia/Taipei'});
-
-  var p1 = '現在台灣時間：' + now + '。\n' +
-    '你是科技新聞編輯。用 Google Search 搜尋過去 24 小時內智慧型手機、平板、穿戴裝置最新消息。\n\n' +
-    '【重要規定】：\n' +
-    '- 所有中文必須是【繁體中文】，嚴禁簡體字\n' +
-    '- 品牌型號保留英文（如 Samsung Galaxy S25）\n\n' +
-    '回傳 10 筆熱度最高的新聞，純 JSON 格式，絕對不可加 markdown 符號或說明文字：\n' +
-    '{"newsItems":[{"brand":"英文品牌名","titleZh":"繁體中文標題","titleEn":"English subtitle",' +
-    '"summary":"繁體摘要2-3句\\n英文1-2 sentences","source":"來源網站","time":"X小時前",' +
-    '"url":"https://完整真實網址","score":90}]}\n\n' +
-    'url 必須是可點擊的完整 https 網址。score 是熱度 0-100。';
-
-  var items1 = [];
-
-  callGemini(p1, true, 5000)
-    .then(function(text) {
-      items1 = parseItems(text);
-      setProgress(45, '已取得 ' + items1.length + ' 則，搜尋第二批... (2/3)');
-      return delay(2500); // Respect free-tier 15 RPM
+  callAPI(buildPrompt([]), true, 5000)
+    .then(function(txt){
+      items1 = parseItems(txt);
+      setP(40,'已取得 '+items1.length+' 則，搜尋第二批... (2/3)');
+      return wait(2800);
     })
-    .then(function() {
-      var used = items1.map(function(n){ return n.titleZh; }).join('；');
-      var p2 = '現在台灣時間：' + now + '。\n' +
-        '你是科技新聞編輯。用 Google Search 搜尋過去 24 小時內智慧型手機、平板相關最新消息。\n' +
-        '以下標題已有，請找不重複的新聞：' + (used || '無') + '\n\n' +
-        '【規定】所有中文必須是【繁體中文】，嚴禁簡體字。\n\n' +
-        '回傳 10 筆不重複的新聞，純 JSON，不加任何 markdown：\n' +
-        '{"newsItems":[{"brand":"英文品牌","titleZh":"繁體標題","titleEn":"English subtitle",' +
-        '"summary":"繁體摘要2句\\n英文1句","source":"來源","time":"X小時前",' +
-        '"url":"https://完整網址","score":75}]}';
-
-      return callGemini(p2, true, 5000);
+    .then(function(){
+      var used = items1.map(function(n){return n.titleZh||'';}).filter(Boolean);
+      return callAPI(buildPrompt(used), true, 5000);
     })
-    .then(function(text) {
-      var items2 = parseItems(text);
-      setProgress(75, '整理摘要中... (3/3)');
-
-      // Merge + deduplicate
-      var seen = {};
-      var all = [];
-      [].concat(items1, items2).forEach(function(item) {
-        var key = (item.titleZh || item.titleEn || '').trim();
-        if (key && !seen[key]) { seen[key] = true; all.push(item); }
+    .then(function(txt){
+      items2 = parseItems(txt);
+      setP(72,'整理資料中... (3/3)');
+      return wait(1200);
+    })
+    .then(function(){
+      // merge + dedup
+      var seen={}, all=[];
+      [].concat(items1,items2).forEach(function(item){
+        var key=(item.titleZh||item.titleEn||'').trim();
+        if(key&&!seen[key]){ seen[key]=true; all.push(item); }
       });
-      all.sort(function(a,b){ return (b.score||0)-(a.score||0); });
+      all.sort(function(a,b){return (b.score||0)-(a.score||0);});
 
-      return delay(1000).then(function(){ return all; });
+      // summary (no search = fast)
+      var heads=all.slice(0,7).map(function(n){return n.titleZh||'';}).filter(Boolean).join('；');
+      var sp='根據以下新聞標題，用繁體中文寫 100 字以內的今日科技重點摘要，直接輸出純文字，不加標題或標點符號以外的任何格式：\n'+heads;
+      return callAPI(sp, false, 600)
+        .then(function(sum){ return {newsItems:all, summaryBoard:sum.trim()}; })
+        .catch(function(){ return {newsItems:all, summaryBoard:''}; });
     })
-    .then(function(all) {
-      // Summary (no search = fast)
-      var heads = all.slice(0,7).map(function(n){ return n.titleZh; }).join('；');
-      var sp = '根據以下新聞標題，用【繁體中文】寫 100 字以內的今日科技重點摘要，直接輸出純文字，不加標題或符號：\n' + heads;
-      return callGemini(sp, false, 512).then(function(sum) {
-        return {newsItems: all, summaryBoard: sum.trim()};
-      }).catch(function() {
-        return {newsItems: all, summaryBoard: ''};
-      });
+    .then(function(result){
+      stopP(); setP(100,'完成！');
+      setCache(result);
+      render(result);
+      var now2=new Date();
+      var h=('0'+now2.getHours()).slice(-2), m=('0'+now2.getMinutes()).slice(-2);
+      el('lastUp').textContent='更新 '+h+':'+m;
+      el('lastUp').style.display='';
+      done(false);
     })
-    .then(function(result) {
-      stopProgressTick();
-      setProgress(100, '完成！');
-      saveCache(result);
-      renderData(result);
-      showLastUpdate(new Date());
-      isLoading = false;
-      setTimeout(function(){ showLoading(false); }, 400);
-    })
-    .catch(function(err) {
-      stopProgressTick();
-      isLoading = false;
-      showLoading(false);
-      var msg = err.message || '';
-      if (msg.indexOf('API_KEY') >= 0 || msg.indexOf('400') >= 0 || msg.indexOf('key') >= 0) {
-        showError('API 金鑰無效，請重新確認並儲存。');
-        showKeyPanel(true);
-      } else if (msg.indexOf('429') >= 0 || msg.indexOf('quota') >= 0 || msg.indexOf('RESOURCE_EXHAUSTED') >= 0) {
-        showError('已達免費版使用上限，請等幾分鐘後再試。');
+    .catch(function(err){
+      stopP();
+      done(false);
+      var msg=err.message||'';
+      if(msg==='NO_KEY'||msg.indexOf('API_KEY')>=0||msg.indexOf('key')>=0||msg.indexOf('400')>=0){
+        setErr('API 金鑰無效，請重新輸入並儲存。');
+        el('keyPanel').classList.add('show');
+      } else if(msg.indexOf('429')>=0||msg.indexOf('quota')>=0||msg.indexOf('EXHAUSTED')>=0){
+        setErr('已達免費版使用上限（每分鐘限制），請等幾分鐘後再試。');
+      } else if(msg.indexOf('Failed to fetch')>=0||msg.indexOf('NetworkError')>=0){
+        setErr('網路連線失敗，請確認網路後重試。');
       } else {
-        showError('搜尋失敗：' + msg.slice(0, 100));
+        setErr('搜尋失敗：'+msg.slice(0,120));
       }
-      if (document.getElementById('newsList').children.length === 0) showEmpty();
+      if(!el('cards').children.length) el('empty').style.display='';
     });
 }
 
-/* ── Render news ────────────────────────────────────── */
-function renderData(result) {
-  var items = (result && result.newsItems) || [];
-  var summary = (result && result.summaryBoard) || '';
-
-  // Summary
-  var sb = document.getElementById('summaryBox');
-  if (summary) {
-    document.getElementById('summaryText').textContent = summary;
-    sb.style.display = 'block';
-    sb.className = 'fadein';
-  }
-
-  // Count
-  var cb = document.getElementById('countBadge');
-  if (items.length > 0) {
-    cb.innerHTML = '共 <span>' + items.length + '</span> 則 · 依熱度排序';
-    cb.style.display = 'block';
-  }
-
-  // Cards
-  var list = document.getElementById('newsList');
-  list.innerHTML = '';
-
-  if (items.length === 0) { showEmpty(); return; }
-
-  items.forEach(function(item, i) {
-    var score = Math.max(0, Math.min(100, item.score || 0));
-    var color = score >= 80 ? '#22d3ee' : score >= 55 ? '#67e8f9' : '#164e63';
-
-    var card = document.createElement('article');
-    card.className = 'card fadein';
-    card.style.animationDelay = Math.min(i * 0.04, 0.8) + 's';
-
-    card.innerHTML =
-      '<div class="meta">' +
-        '<span class="brand">' + esc(item.brand || '—') + '</span>' +
-        '<span class="time">' + esc(item.time || '') + '</span>' +
-        '<span class="src">' + esc(item.source || '') + '</span>' +
-      '</div>' +
-      '<div class="titleZh">' + esc(item.titleZh || '') + '</div>' +
-      '<div class="titleEn">' + esc(item.titleEn || '') + '</div>' +
-      '<div class="hotrow">' +
-        '<div class="hotbar"><div class="hotfill" style="width:' + score + '%;background:' + color + ';"></div></div>' +
-        '<span class="hotscore" style="color:' + color + ';font-size:9px;">HOT ' + score + '</span>' +
-      '</div>' +
-      '<div class="summary">' + esc(item.summary || '') + '</div>' +
-      '<button class="linkBtn" onclick="openLink(' + JSON.stringify(item.url || '') + ')">' +
-        '查看原文 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
-      '</button>';
-
-    list.appendChild(card);
-  });
+function done(loading){
+  busy=loading;
+  el('progBox').style.display=loading?'block':'none';
+  el('scanBtn').disabled=loading;
+  el('scanIcon').classList.toggle('spin',loading);
+  el('scanTxt').textContent=loading?'掃描中...':'重新掃描';
 }
 
-/* ── Escape HTML ────────────────────────────────────── */
-function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+// ── render ────────────────────────────────────────────
+function render(result){
+  var items=(result&&result.newsItems)||[];
+  var sum=(result&&result.summaryBoard)||'';
+
+  if(sum){
+    el('sumText').textContent=sum;
+    el('sumBox').style.display='';
+  }
+  if(items.length){
+    el('countEl').innerHTML='共 <b>'+items.length+'</b> 則 · 依熱度排序';
+    el('countEl').style.display='';
+  }
+
+  var frag=document.createDocumentFragment();
+  items.forEach(function(item,i){
+    var s=Math.max(0,Math.min(100,item.score||0));
+    var c=s>=80?'#22d3ee':s>=55?'#67e8f9':'#1e3a4a';
+
+    var card=document.createElement('div');
+    card.className='card';
+    card.style.animationDelay=Math.min(i*.04,.7)+'s';
+    card.innerHTML=
+      '<div class="card-meta">'+
+        '<span class="brand-tag">'+esc(item.brand||'—')+'</span>'+
+        '<span class="time-tag">'+esc(item.time||'')+'</span>'+
+        '<span class="src-tag">'+esc(item.source||'')+'</span>'+
+      '</div>'+
+      '<div class="title-zh">'+esc(item.titleZh||'')+'</div>'+
+      '<div class="title-en">'+esc(item.titleEn||'')+'</div>'+
+      '<div class="hot-row">'+
+        '<div class="hot-track"><div class="hot-fill" style="width:'+s+'%;background:'+c+'"></div></div>'+
+        '<span class="hot-label" style="color:'+c+'">HOT '+s+'</span>'+
+      '</div>'+
+      '<div class="card-summary">'+esc(item.summary||'')+'</div>'+
+      '<button class="link-btn" onclick="openLink('+JSON.stringify(item.url||'')+')">'+'查看原文 ↗'+'</button>';
+    frag.appendChild(card);
+  });
+  el('cards').appendChild(frag);
+  if(!items.length) el('empty').style.display='';
 }
 </script>
 </body>
